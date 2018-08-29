@@ -1,3 +1,6 @@
+"""
+Tests for the Battleship application
+"""
 import datetime
 
 from django.test import TestCase
@@ -33,8 +36,8 @@ class APIViewsTest(TestCase):
 
     def test_place_ship(self):
         url = reverse('place_ship', kwargs={'game_id': int(1)})
-        response = self.client.post(url, {'orientation': 'HR',
-                                          'style': 'CRUISER',
-                                          'row': int(1),
-                                          'column': int(2)})
+        response = self.client.post(url, {'orientation': Ship.HORIZONTAL,
+                                          'type': Ship.CRUISER,
+                                          'row': 1,
+                                          'column': 0})
         self.assertEqual(response.status_code, 200)

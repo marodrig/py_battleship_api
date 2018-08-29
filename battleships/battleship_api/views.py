@@ -1,8 +1,13 @@
+"""
+Controllers for the Battleship application
+
+"""
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import DatabaseError, DataError
-from .models import Game, Ship, Tile, Play
 from django.utils import timezone
+
+from .models import Game, Ship, Tile, Play
 
 # Create your views here.
 
@@ -31,13 +36,17 @@ def place_ship(request, game_id):
     """
     game_inst = get_object_or_404(Game, pk=game_id)
     if request.method == 'POST':
-        orientation = request.POST.get('orientation', '')
-        ship_type = request.POST.get('type', '')
-        # row = request.POST.get('row', '')
-        # column = request.POST.get('column', '')
+        orientation = request.POST.get('orientation', Ship.HORIZONTAL)
+        ship_type = request.POST.get('type', Ship.CRUISER)
+        row = request.POST.get('row', 0)
+        column = request.POST.get('column', 0)
         ship_inst = game_inst.ship_set.create(orientation=orientation,
-                                              ship_style=ship_type,
+                                              tile_size=ship_type,
                                               is_alive=True)
+        ship_inst.tile_set.create(hit=False, row=row, column=column)
+        for _ in range(ship_inst.tile_size - 1):
+            if ship_inst.orientation == 'HR':
+                ship_inst.tile_set.create(hit=False, row=row, column=column)
         return HttpResponse("Ship id: {}".format(ship_inst.pk))
     elif request.method == 'GET':
         ship_list = game_inst.ship_set.all()
