@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'battleship_api.apps.BattleshipApiConfig',
 ]
 
 MIDDLEWARE = [
