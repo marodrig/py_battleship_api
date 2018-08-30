@@ -16,7 +16,11 @@ from .models import Game, Tile, Ship
 class APIViewsTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        Game.objects.create(start_date=timezone.now())
+        game_inst = Game.objects.create(start_date=timezone.now())
+        ship_inst = game_inst.ship_set.create(orientation=Ship.HORIZONTAL,
+                                              tile_size=Ship.CARRIER,
+                                              is_alive=True)
+        ship_inst.tile_set.create(hit=False, row=int(1), column=int(1))
 
     @classmethod
     def tearDownTestData(cls):
@@ -36,14 +40,17 @@ class APIViewsTest(TestCase):
 
     def test_place_ship(self):
         url = reverse('place_ship', kwargs={'game_id': int(1)})
-        response = self.client.post(url, {'orientation': Ship.HORIZONTAL,
-                                          'type': Ship.CRUISER,
-                                          'row': 1,
-                                          'column': 0})
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 200)
 
     def test_torpedo_hit(self):
         url = reverse('torpedo', kwargs={'game_id': int(1)})
-        response = self.client.get(url, {'row': int(1),
-                                         'column': int(1)})
+        data = {'row': int(1), 'column': int(1)}
+        response = self.client.get(url, data)
         self.assertEqual(response.status_code, 200)
+
+    def test_missed_shot(self):
+        url = reverse('torpedo', kwargs={'game_id': int(1)})
+        data = {'row': int(3), 'column': int(4)}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, 404)

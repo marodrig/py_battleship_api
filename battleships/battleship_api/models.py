@@ -12,14 +12,14 @@ class Game(models.Model):
 
 
 class Ship(models.Model):
-    #Orientation choices
+    # Orientation choices
     HORIZONTAL = 'HR'
     VERTICAL = 'VR'
     ORIENTATION_CHOICES = (
         (HORIZONTAL, 'Horizontal'),
         (VERTICAL, 'Vertical')
     )
-    #Using the ship type to set the number of tiles
+    # Using the ship type to set the number of tiles
     CARRIER = 5
     BATTLESHIP = 4
     CRUISER = 3

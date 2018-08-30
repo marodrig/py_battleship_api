@@ -2,18 +2,22 @@
 Controllers for the Battleship application
 
 """
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+import random
+
 from django.db import DatabaseError, DataError
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
-from .models import Game, Ship, Tile, Play
+from .models import Game, Play, Ship, Tile
 
 # Create your views here.
 
 
 def games(request):
     """
+    Creates a new entry in the Games table for a POST request
+    Returns all the rows in the Games table for a GET request
     """
     if request.method == 'POST':
         game = Game.objects.create(start_date=timezone.now())
@@ -25,6 +29,8 @@ def games(request):
 
 def get_game(request, game_id):
     """
+    Returns a row from the Games table for the given game_id    
+
     """
     if request.method == 'GET':
         game_inst = get_object_or_404(Game, pk=game_id)
@@ -33,21 +39,53 @@ def get_game(request, game_id):
 
 def place_ship(request, game_id):
     """
+    Randomly populates the game with 5 ships.
+
     """
     game_inst = get_object_or_404(Game, pk=game_id)
+    # use a set to keep track of placed ships
+    # use ship_set count to keep track of the number of ship.
+    # keep a set of tuples for the tiles created.
+    # randomly pick a starting front location, increase row or column 
+    # depending on orientation.
     if request.method == 'POST':
-        orientation = request.POST.get('orientation', Ship.HORIZONTAL)
-        ship_type = request.POST.get('type', Ship.CRUISER)
-        row = request.POST.get('row', 0)
-        column = request.POST.get('column', 0)
-        ship_inst = game_inst.ship_set.create(orientation=orientation,
-                                              tile_size=ship_type,
-                                              is_alive=True)
-        ship_inst.tile_set.create(hit=False, row=row, column=column)
-        return HttpResponse("Ship id: {}".format(ship_inst.pk))
-    elif request.method == 'GET':
-        ship_list = game_inst.ship_set.all()
-        return HttpResponse(ship_list[:10])
+        game_inst = get_object_or_404(Game, pk=game_id)
+        if game_inst.ship_set.count() == 5:
+            return HttpResponse('All ships places.')
+        else:
+            picked_classes = random.sample([x[0] for x in Ship.TYPE_CHOICES], 
+                                           len(Ship.TYPE_CHOICES))
+            for ship_type in picked_classes:
+                rand_orientation = random.choice(Ship.ORIENTATION_CHOICES)
+                game_inst.ship_set.create(orientation=rand_orientation,
+                                          tile_size=ship_type)
+            
+            for ship in game_inst.ship_set.all():
+                add_tile(ship)
+
+        return HttpResponse("Placed ships:{}".format(game_inst.ship_set.count()))
+
+
+def add_tile(ship_inst):
+    """
+    """
+    valid_range = [x for x in range(1, 11)]
+    placed_tiles_set = set()
+    if isinstance(ship_inst, Ship):
+        row, column = random.choice(valid_range), random.choice(valid_range)
+        if (row, column) in placed_tiles_set:
+            pass
+        else:
+            placed_tiles_set.add((row, column))
+            ship_inst.tile_set.create(row=row, column=column)
+            if ship_inst.orientation == 'HR':
+                for _ in range(ship_inst.tile_size):
+                    column += 1
+                    ship_inst.tile_set.create(row=row, column=column)
+            else:
+                for _ in range(ship_inst.tile_size):
+                    row += 1
+                    ship_inst.tile_set.create(row=row, column=column)
 
 
 def get_ship_detail(request, game_id, ship_id):
@@ -60,28 +98,11 @@ def get_ship_detail(request, game_id, ship_id):
         return HttpResponse("Error")
 
 
-def add_tile(request, ship_id):
-    """
-    """
-    ship_inst = get_object_or_404(Ship, pk=ship_id)
-    for i in range(5):
-        ship_inst.tile_set.create(hit=False, row=i, column=i+1)
-    for tile in ship_inst.tile_set.all():
-        print("{0}:{1}".format(tile.pk, tile.hit))
-    return HttpResponse("Tile:{}".format(ship_inst.tile_set.all()))
-
-
 def torpedo(request, game_id):
     """
     """
     if request.method == 'GET':
         row = request.GET.get('row', -1)
         column = request.GET.get('column', -1)
-        try:
-            tile_inst = Tile.objects.get(row=row, column=column)
-            if not tile_inst.hit:
-                tile_inst.hit = True
-                return HttpResponse("Hit")
-        except Tile.DoesNotExist:
-            return HttpResponse("Missed.")
-        
+        get_object_or_404(Tile, row=row, column=column)
+        return HttpResponse('Hit')
