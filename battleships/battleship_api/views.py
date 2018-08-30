@@ -5,10 +5,11 @@ Controllers for the Battleship application
 import random
 
 from django.db import DatabaseError, DataError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.core.serializers import serialize
 
 from .models import Game, Play, Ship, Tile
 
@@ -26,7 +27,7 @@ def games(request):
         return HttpResponse("Game created: {}".format(game.pk))
     elif request.method == 'GET':
         games_list = Game.objects.all()
-        return HttpResponse(games_list[:10])
+        return HttpResponse(serialize('json', games_list))
 
 
 def get_game(request, game_id):
@@ -36,9 +37,7 @@ def get_game(request, game_id):
     """
     if request.method == 'GET':
         game_inst = get_object_or_404(Game, pk=game_id)
-        for ship in game_inst.ship_set.all():
-            print("Ship: {0}".format(ship))
-        return HttpResponse("Date: {}".format(game_inst.start_date))
+        return HttpResponse(serialize('json', game_inst.ship_set.all()))
 
 
 @csrf_exempt
@@ -69,7 +68,7 @@ def place_ship(request, game_id):
                 add_tile(ship, placed_tiles_set)
         else:
             return HttpResponse('All ships places.')
-        return HttpResponse("Placed ships:{}".format(game_inst.ship_set.count()))
+        return JsonResponse({'ships_placed': game_inst.ship_set.count()})
 
 
 def add_tile(ship_inst, placed_tiles_set):
@@ -112,11 +111,7 @@ def get_tiles(request, game_id, ship_id):
     """
     if request.method == 'GET':
         game_inst = get_object_or_404(Game, pk=game_id)
-        for ship in game_inst.ship_set.all():
-            print(ship)
-            for tile in ship.tile_set.all():
-                print(tile)
-        return HttpResponse(game_inst.ship_set.all())
+        return HttpResponse(serialize('json', game_inst.tile_set.all()))
 
 
 def get_ship_detail(request, game_id, ship_id):
@@ -124,7 +119,7 @@ def get_ship_detail(request, game_id, ship_id):
     """
     if request.method == 'GET':
         ship_inst = get_object_or_404(Ship, pk=ship_id)
-        return HttpResponse("Ship: {}".format(ship_inst.pk))
+        return HttpResponse(serialize('json', ship_inst))
     else:
         return HttpResponse("Error")
 
@@ -132,10 +127,20 @@ def get_ship_detail(request, game_id, ship_id):
 def torpedo(request, game_id):
     """
     """
+    tile_not_hit = set()
     if request.method == 'GET':
+        game_inst = get_object_or_404(Game, pk=game_id)
         row = int(request.GET.get('row', -1))
         column = int(request.GET.get('column', -1))
-        print("row: {0} column: {1}".format(row, column))
-        tile_inst = get_object_or_404(Tile, row=row, column=column)
-        tile_inst.hit = True
-        return HttpResponse()
+        ships = Ship.objects.filter(game_id=game_id)
+        for ship in ships:
+            for tile in ship.tile_set.all():
+                if not tile.hit:
+                    tile_not_hit.add((tile.row, tile.column))
+        if (row, column) in tile_not_hit:
+            tile_inst = get_object_or_404(Tile, row=row, column=column)
+            tile_inst.hit = True
+            tile_inst.save()
+            tile_not_hit.remove((row, column))
+            return HttpResponse(serialize('json', tile_inst))
+        return JsonResponse({'hit': False})

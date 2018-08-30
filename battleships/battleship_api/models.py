@@ -57,10 +57,11 @@ class Ship(models.Model):
 
 class Tile(models.Model):
     """
-    Tile related to a given ship
+    Tile related to a given ship in a given game
 
     """
-    ship = models.ForeignKey(Ship, on_delete=models.CASCADE)
+    ship = models.ForeignKey(Ship, null=True, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, null=True, on_delete=models.CASCADE)
     hit = models.BooleanField(default=False)
     row = models.IntegerField()
     column = models.IntegerField()
