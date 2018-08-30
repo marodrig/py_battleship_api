@@ -44,9 +44,6 @@ def place_ship(request, game_id):
                                               tile_size=ship_type,
                                               is_alive=True)
         ship_inst.tile_set.create(hit=False, row=row, column=column)
-        for _ in range(ship_inst.tile_size - 1):
-            if ship_inst.orientation == 'HR':
-                ship_inst.tile_set.create(hit=False, row=row, column=column)
         return HttpResponse("Ship id: {}".format(ship_inst.pk))
     elif request.method == 'GET':
         ship_list = game_inst.ship_set.all()
@@ -80,4 +77,11 @@ def torpedo(request, game_id):
     if request.method == 'GET':
         row = request.GET.get('row', -1)
         column = request.GET.get('column', -1)
-        return HttpResponse('Torpedo fired! row={0}, column={1}'.format(row, column))
+        try:
+            tile_inst = Tile.objects.get(row=row, column=column)
+            if not tile_inst.hit:
+                tile_inst.hit = True
+                return HttpResponse("Hit")
+        except Tile.DoesNotExist:
+            return HttpResponse("Missed.")
+        

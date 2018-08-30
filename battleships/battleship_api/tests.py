@@ -41,3 +41,9 @@ class APIViewsTest(TestCase):
                                           'row': 1,
                                           'column': 0})
         self.assertEqual(response.status_code, 200)
+
+    def test_torpedo_hit(self):
+        url = reverse('torpedo', kwargs={'game_id': int(1)})
+        response = self.client.get(url, {'row': int(1),
+                                         'column': int(1)})
+        self.assertEqual(response.status_code, 200)
