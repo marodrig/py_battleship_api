@@ -77,22 +77,32 @@ def add_tile(ship_inst, placed_tiles_set):
     """
     valid_range = [x for x in range(1, 11)]
     if isinstance(ship_inst, Ship):
-        row, column = random.choice(valid_range), random.choice(valid_range)
-        if (row, column) in placed_tiles_set:
-            pass
-        else:
-            placed_tiles_set.add((row, column))
-            ship_inst.tile_set.create(row=row, column=column)
-            if ship_inst.orientation == 'HR':
-                for _ in range(ship_inst.tile_size):
-                    column += 1
-                    ship_inst.tile_set.create(row=row, column=column)
-                    placed_tiles_set.add((row, column))
+        while ship_inst.tile_set.count() < ship_inst.tile_size:
+            row, column = random.choice(valid_range), random.choice(valid_range)
+            if (row, column) in placed_tiles_set and valid_tile(ship_inst, row, column):
+                continue
             else:
-                for _ in range(ship_inst.tile_size):
-                    row += 1
-                    ship_inst.tile_set.create(row=row, column=column)
-                    placed_tiles_set.add((row, column))
+                placed_tiles_set.add((row, column))
+                ship_inst.tile_set.create(row=row, column=column)
+                if ship_inst.orientation == Ship.HORIZONTAL:
+                    for _ in range(ship_inst.tile_size - 1):
+                        column += 1
+                        ship_inst.tile_set.create(row=row, column=column)
+                        placed_tiles_set.add((row, column))
+                else:
+                    for _ in range(ship_inst.tile_size - 1):
+                        row += 1
+                        ship_inst.tile_set.create(row=row, column=column)
+                        placed_tiles_set.add((row, column))
+
+
+def valid_tile(ship_inst, row, column):
+    """
+    """
+    if ship_inst.orientation == Ship.HORIZONTAL:
+        return column + ship_inst.tile_size <= 10
+    elif ship_inst.orientation == Ship.VERTICAL:
+        return row + ship_inst.tile_size <= 10
 
 
 def get_tiles(request, game_id, ship_id):
