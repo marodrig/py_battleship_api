@@ -24,7 +24,9 @@ def games(request):
     """
     if request.method == 'POST':
         game = Game.objects.create(start_date=timezone.now())
-        return HttpResponse("Game created: {}".format(game.pk))
+        response = HttpResponse()
+        response['location'] = "battleship/api/v1/games/{0}/".format(game.pk)
+        return response
     elif request.method == 'GET':
         games_list = Game.objects.all()
         return HttpResponse(serialize('json', games_list))
@@ -63,6 +65,8 @@ def place_ship(request, game_id):
         else:
             return HttpResponse('All ships places.')
         return JsonResponse({'ships_placed': game_inst.ship_set.count()})
+    if request.method == 'GET':
+        data ={''}
 
 
 def add_tile(ship_inst, placed_tiles_set):
