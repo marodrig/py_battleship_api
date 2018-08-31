@@ -10,5 +10,7 @@ urlpatterns = [
          views.get_ship_detail,
          name='get_ship_detail'),
     path('games/<int:game_id>/shot', views.torpedo, name='torpedo'),
-    path('games/<int:game_id>/ships/<int:ship_id>/tiles', views.get_tiles, name='get_tiles'),
+    path('games/<int:game_id>/ships/<int:ship_id>/tiles', 
+         views.get_tiles, 
+         name='get_tiles'),
 ]
