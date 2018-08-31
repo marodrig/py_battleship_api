@@ -47,24 +47,18 @@ def place_ship(request, game_id):
 
     """
     game_inst = get_object_or_404(Game, pk=game_id)
-    # use a set to keep track of placed ships
-    # use ship_set count to keep track of the number of ship.
-    # keep a set of tuples for the tiles created.
-    # randomly pick a starting front location, increase row or column 
-    # depending on orientation.
     if request.method == 'POST':
         game_inst = get_object_or_404(Game, pk=game_id)
         if game_inst.ship_set.count() < 5:
-            picked_classes = random.sample([x[0] for x in Ship.TYPE_CHOICES], 
+            rand_ship_type = random.sample([x[0] for x in Ship.TYPE_CHOICES], 
                                            len(Ship.TYPE_CHOICES))
-            for ship_type in picked_classes:
+            for ship_type in rand_ship_type:
                 rand_orientation = random.choice(Ship.ORIENTATION_CHOICES)
                 game_inst.ship_set.create(orientation=rand_orientation,
                                           tile_size=ship_type)
             
             placed_tiles_set = set()
             for ship in game_inst.ship_set.all():
-                print(ship)
                 add_tile(ship, placed_tiles_set)
         else:
             return HttpResponse('All ships places.')
@@ -129,7 +123,6 @@ def torpedo(request, game_id):
     """
     tile_not_hit = set()
     if request.method == 'GET':
-        game_inst = get_object_or_404(Game, pk=game_id)
         row = int(request.GET.get('row', -1))
         column = int(request.GET.get('column', -1))
         ships = Ship.objects.filter(game_id=game_id)
@@ -142,5 +135,5 @@ def torpedo(request, game_id):
             tile_inst.hit = True
             tile_inst.save()
             tile_not_hit.remove((row, column))
-            return HttpResponse(serialize('json', tile_inst))
-        return JsonResponse({'hit': False})
+            return JsonResponse(status=200, data={'status': 'Hit'})
+        return JsonResponse(status=404, data={'hit': False, 'status': 'Miss'})
