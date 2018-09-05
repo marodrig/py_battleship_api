@@ -63,7 +63,7 @@ def place_ship(request, game_id):
             for ship in game_inst.ship_set.all():
                 add_tile(ship, placed_tiles_set)
         else:
-            return HttpResponse('All ships places.')
+            return HttpResponse('All ships placed.')
         return JsonResponse({'ships_placed': game_inst.ship_set.count()})
     if request.method == 'GET':
         data = {'rel': 'Ships',
@@ -88,16 +88,13 @@ def add_tile(ship_inst, placed_tiles_set):
                 ship_inst.tile_set.create(game=ship_inst.game,
                                           row=row,
                                           column=column)
-                if ship_inst.orientation == Ship.HORIZONTAL:
-                    for _ in range(ship_inst.tile_size - 1):
+                for _ in range(ship_inst.tile_size - 1):
+                    if ship_inst.orientation == Ship.HORIZONTAL:
                         column += 1
-                        ship_inst.tile_set.create(game=ship_inst.game, row=row, column=column)
-                        placed_tiles_set.add((row, column))
-                else:
-                    for _ in range(ship_inst.tile_size - 1):
+                    elif ship_inst.orientation == Ship.VERTICAL:
                         row += 1
-                        ship_inst.tile_set.create(game=ship_inst.game, row=row, column=column)
-                        placed_tiles_set.add((row, column))
+                    ship_inst.tile_set.create(game=ship_inst.game, row=row, column=column)
+                    placed_tiles_set.add((row, column))
 
 
 def valid_tile(ship_inst, row, column):

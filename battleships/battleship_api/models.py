@@ -55,7 +55,7 @@ class Ship(models.Model):
         return "ship orientation:{0} tiles:{1}".format(self.orientation, self.tile_size)
 
 
-class Tile(models.Model):
+class ShipCoordinates(models.Model):
     """
     Tile related to a given ship in a given game
 
@@ -71,19 +71,3 @@ class Tile(models.Model):
         """
 
         return "Row:{0} column:{1} hit:{2}".format(self.row, self.column, self.hit)
-
-
-class Play(models.Model):
-    """
-    Record of each play in a game of battleship
-
-    """
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    play_row = models.IntegerField()
-    play_col = models.IntegerField()
-    result = models.CharField(max_length=6)
-
-    def __str__(sefl):
-        """
-        """
-        return "Play--> row:{0} column:{1} result:{2}".format(self.row, self.column, self.result)
