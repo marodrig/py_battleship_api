@@ -17,10 +17,11 @@ from .models import Game, Play, Ship, Tile
 
 
 @csrf_exempt
-def games(request):
+def get_games_collection(request):
     """
     Creates a new entry in the Games table for a POST request
     Returns all the rows in the Games table for a GET request
+
     """
     if request.method == 'POST':
         game = Game.objects.create(start_date=timezone.now())
@@ -30,9 +31,11 @@ def games(request):
     elif request.method == 'GET':
         games_list = Game.objects.all()
         return HttpResponse(serialize('json', games_list))
+    else:
+        return HttpResponse(status=405)
 
 
-def get_game(request, game_id):
+def get_game_status(request, game_id):
     """
     Returns a row from the Games table for the given game_id    
 
@@ -40,6 +43,15 @@ def get_game(request, game_id):
     if request.method == 'GET':
         game_inst = get_object_or_404(Game, pk=game_id)
         return HttpResponse(serialize('json', game_inst.ship_set.all()))
+    elif request.method == 'DELETE':
+        game_inst = get_object_or_404(Game, pk=game_id)
+        game_inst.delete()
+        game_inst.save()
+        return HttpResponse('Deleted record with id: {}'.format(game_id))
+    elif request.method == 'PATCH':
+        update_game_from_req(request)
+    elif request.method == 'PUT':
+        
 
 
 @csrf_exempt
@@ -68,7 +80,7 @@ def place_ship(request, game_id):
     if request.method == 'GET':
         data = {'rel': 'Ships',
                 'method': 'POST',
-                'Error': 'Not allowed to see ships!'}
+                'error': 'Not allowed to see ships!'}
         return JsonResponse(status=404, data=data)
 
 
@@ -116,6 +128,8 @@ def get_tiles(request, game_id, ship_id):
     if request.method == 'GET':
         game_inst = get_object_or_404(Game, pk=game_id)
         return HttpResponse(serialize('json', game_inst.tile_set.all()))
+    else:
+        return HttpResponse(status=405)
 
 
 def get_ship_detail(request, game_id, ship_id):
@@ -127,7 +141,7 @@ def get_ship_detail(request, game_id, ship_id):
         ship_inst = get_object_or_404(Ship, pk=ship_id)
         return HttpResponse(serialize('json', ship_inst))
     else:
-        return HttpResponse("Error")
+        return HttpResponse(status=405)
 
 
 def torpedo(request, game_id):
@@ -135,9 +149,9 @@ def torpedo(request, game_id):
     Checks if a torpedo has hit a tile belonging to a ship
 
     """
-    if request.method == 'GET':
-        row = int(request.GET.get('row', -1))
-        column = int(request.GET.get('column', -1))
+    if request.method == 'POST':
+        row = int(request.POST.get('row', -1))
+        column = int(request.POST.get('column', -1))
         game_inst = get_object_or_404(Game, pk=game_id)
         tile_inst = None
         data = {}
@@ -164,7 +178,7 @@ def torpedo(request, game_id):
 
 def update_sunked_ships(game_inst):
     """
-        Checks the number of hits on a ship to see if it's floating
+    Checks the number of hits on a ship to see if it's floating
 
     """
     for ship in game_inst.ship_set.all():
