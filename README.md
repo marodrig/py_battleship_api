@@ -2,14 +2,33 @@
 Django application implementing a basic REST API for battleship.
 
 ## Table of Contents
-1.[Requirements](#requirements)
+1.[Features](#Features)
 
-## Requirements
+2.[Prerequisites](#prerequisites)
+
+3.[Getting Started](#getting)
+
+## Features
+
+A RESTful API for a one player game of battleship.  It includes the ability to 
+
+## Prerequisites
+
 - Python 3.5.2
 - Django.
 - Pip for managing Python Packages.
 - Coverage.py for checking test coverage of code.
 - virtualenv to separte our development environment and Python version from other projects.
+
+## Getting Started
+
+## Usage
+
+## Running Tests
+
+## Deployment
+
+## Built with
 
 ### Python
 ### PIP
