@@ -2,11 +2,11 @@
 Django application implementing a basic REST API for battleship.
 
 ## Table of Contents
-1.[Features](#Features)
+1.[Features](#features)
 
 2.[Prerequisites](#prerequisites)
 
-3.[Getting Started](#getting)
+3.[Getting Started](#getting-started)
 
 ## Features
 
