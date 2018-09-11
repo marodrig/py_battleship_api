@@ -1,15 +1,18 @@
 # py_battleship_api
 Django application implementing a basic REST API for battleship.
 
-# Requirements
+## Table of Contents
+1.[Requirements](#requirements)
+
+## Requirements
 - Python 3.5.2
 - Django.
 - Pip for managing Python Packages.
 - Coverage.py for checking test coverage of code.
 - virtualenv to separte our development environment and Python version from other projects.
 
-## Python
-## PIP
+### Python
+### PIP
 
 Once we have installed pip, we can install the requirements by typing:
 
@@ -17,14 +20,14 @@ Once we have installed pip, we can install the requirements by typing:
 pip install -r requirements.txt
 ```
 
-## Virtualenv
+### Virtualenv
 
 A more detail guide of how to setup virtualenv for our enviroment can be found in the following link:
 
 [https://packaging.python.org/guides/installing-using-pip-and-virtualenv/](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/)
 
 
-# Usage
+## Usage
 
 The API endpoints response are in JSON format.
 
@@ -35,7 +38,7 @@ The API endpoints response are in JSON format.
 |/battleship/api/v1/games/<int:game_id>     | Return information about the game    | N/A                 |
 |/battleship/api/v1/games/<int:game_id>/shot?row=1&column=1     | Launches a torpedo at location row, column   | N/A|
 
-## Data base migration
+### Data base migration
 
 This project uses a sqlite3 database. You will need to create and migrate the schema using django's migration tool.
 ```
@@ -48,7 +51,7 @@ python manage.py migrate
 
 The database has been setup.
 
-## Running server locally
+### Running server locally
 
 The current settings are set for port 8000 on localhost.  You can start the server by typing:
 
@@ -56,9 +59,9 @@ The current settings are set for port 8000 on localhost.  You can start the serv
 python manage.py runserver
 ```
 
-## Running Tests
+### Running Tests
 
-## Testing coverage of unit tests
+### Testing coverage of unit tests
 
 We can use coverage.py to check how much of our code has been tested by our unit tests.  First we need to run our tests using coverage by typing the following on the prompt:
 
@@ -72,4 +75,4 @@ To read the report of the break down of our unit test coverage we can do so by t
 coverage report
 ```
 
-# License
+## License
