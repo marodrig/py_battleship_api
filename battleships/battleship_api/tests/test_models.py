@@ -1,13 +1,13 @@
 """
-Tests for the Battleship application
+Tests the models in the battleship application
+
 """
-import datetime
 
 from django.test import TestCase
 # from django.test.utils import setup_test_environment, teardown_test_environment
 from django.utils import timezone
 
-from ..models import Game, ShipCoordinates, Ship
+from ..models import Game, Ship, ShipCoordinates
 
 # Create your tests here.
 
@@ -56,7 +56,7 @@ class ModelsTests(TestCase):
         cruisers_ships_qs = self.game_inst.ship_set.filter(
             length=Ship.CRUISER
             )
-        self.assertEqual(1, cruisers_ships_qs.count())
+        self.assertEqual(2, cruisers_ships_qs.count())
 
     def test_no_repeated_submarines_in_random_ships(self):
         """
@@ -65,7 +65,7 @@ class ModelsTests(TestCase):
         submarines_ships_qs = self.game_inst.ship_set.filter(
             length=Ship.SUBMARINE
             )
-        self.assertEqual(1, submarines_ships_qs.count())
+        self.assertEqual(2, submarines_ships_qs.count())
 
     def test_no_repeated_destroyers_in_random_ships(self):
         """
@@ -212,8 +212,3 @@ class ModelsTests(TestCase):
             hit=False
         )
         self.assertIsNotNone(coord_inst)
-
-    def test_random_coordinates_are_valid(self):
-        """
-        """
-        pass
