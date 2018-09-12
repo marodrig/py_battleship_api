@@ -2,15 +2,23 @@
 Django application implementing a basic REST API for battleship.
 
 ## Table of Contents
-1.[Features](#features)
+1. [Features](#features)
 
-2.[Prerequisites](#prerequisites)
+2. [Prerequisites](#prerequisites)
 
-3.[Getting Started](#getting-started)
+3. [Getting Started](#getting-started)
+
+4. [Usage](#usage)
+
+5. [Running Tests](#running-tests)
+
+6. [Built With](#built-with)
+
+7. [License](#license)
 
 ## Features
 
-A RESTful API for a one player game of battleship.  It includes the ability to 
+A RESTful API for a one player game of battleship.  It includes the ability to randomize the starting location of oponents ships.
 
 ## Prerequisites
 
@@ -22,15 +30,10 @@ A RESTful API for a one player game of battleship.  It includes the ability to
 
 ## Getting Started
 
-## Usage
-
-## Running Tests
-
-## Deployment
-
-## Built with
-
 ### Python
+
+We need python version 3.x.x
+
 ### PIP
 
 Once we have installed pip, we can install the requirements by typing:
@@ -44,8 +47,6 @@ pip install -r requirements.txt
 A more detail guide of how to setup virtualenv for our enviroment can be found in the following link:
 
 [https://packaging.python.org/guides/installing-using-pip-and-virtualenv/](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/)
-
-
 ## Usage
 
 The API endpoints response are in JSON format.
@@ -93,5 +94,9 @@ To read the report of the break down of our unit test coverage we can do so by t
 ```
 coverage report
 ```
+
+## Deployment
+
+## Built with
 
 ## License
