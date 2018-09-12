@@ -81,6 +81,12 @@ python manage.py runserver
 
 ### Running Tests
 
+Having succesfully activated the virtual environment, the user can navigate to the battleship directory where manage.py is found.  The following command will run all tests cases in the tests directory.
+
+```
+python manage.py test --verbosity 1
+```
+
 ### Testing coverage of unit tests
 
 We can use coverage.py to check how much of our code has been tested by our unit tests.  First we need to run our tests using coverage by typing the following on the prompt:
