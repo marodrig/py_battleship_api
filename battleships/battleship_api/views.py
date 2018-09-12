@@ -35,7 +35,7 @@ def get_games_collection(request):
 
 def get_game_status(request, game_id):
     """
-    Returns a row from the Games table for the given game_id    
+    Returns a row from the Games table for the given game_id
 
     """
     if request.method == 'GET':

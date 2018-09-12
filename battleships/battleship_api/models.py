@@ -33,7 +33,7 @@ class Game(models.Model):
             for ship in self.ship_set.all():
                 ship.rand_ship_position()
 
-    def update_game_state(self):
+    def update_state(self):
         """
         Check's if the game is over
 
@@ -62,7 +62,7 @@ class Ship(models.Model):
     SUBMARINE = 3
     DESTROYER = 2
     TYPE_CHOICES = (
-        (CARRIER, 'CRUISER'),
+        (CARRIER, 'CARRIER'),
         (BATTLESHIP, 'BATTLESHIP'),
         (CRUISER, 'CRUISER'),
         (SUBMARINE, 'SUBMARINE'),
@@ -88,35 +88,36 @@ class Ship(models.Model):
         """
         used_coordinates_set = set()
         valid_range = [x for x in range(ShipCoordinates.MIN_COORDINATE, ShipCoordinates.MAX_COORDINATE)]
-        while self.ship_coordinates_set.count() < self.length:
+        while self.shipcoordinates_set.count() < self.length:
             row, column = random.choice(valid_range), random.choice(valid_range)
             if (row, column) in used_coordinates_set:
                 continue
             else:
                 used_coordinates_set.add((row, column))
-                self.tile_set.create(game=self.game,
-                                     row=row,
-                                     column=column)
+                self.shipcoordinates_set.create(
+                    game=self.game,
+                    row=row,
+                    column=column)
                 for x in range(self.length - 1):
                     if self.orientation == Ship.HORIZONTAL:
                         column += 1
                     elif self.orientation == Ship.VERTICAL:
                         row += 1
-                    self.ship_coordinates_set.create(game=self.game,
-                                                     row=row,
-                                                     column=column)
+                    self.shipcoordinates_set.create(game=self.game,
+                                                    row=row,
+                                                    column=column)
                     used_coordinates_set.add((row, column))
 
     def get_num_hits(self):
         """
         """
-        return self.ship_coordinates_set.filter(is_hit=True).count()
+        return self.shipcoordinates_set.filter(hit=True).count()
 
-    def update_ship_state(self):
+    def update_state(self):
         """
         """
-        num_hits = self.ship_coordinates_set.filter(is_hit=True).count()
-        if num_hits == self.tile_size:
+        num_hits = self.shipcoordinates_set.filter(hit=True).count()
+        if num_hits == self.length:
             self.is_alive = False
 
     def __str__(self):
@@ -132,12 +133,14 @@ class Ship(models.Model):
     def add_coord(self, row, column):
         """
         """
-        if self.ship_coordinates_set.all().count() < self.tile_size:
-            self.ship_coordinates_set.create(row=row,
-                                             column=column,
-                                             is_hit=False)
+        # TODO check for repeated coordinates
+        if self.shipcoordinates_set.all().count() < self.length:
+            self.shipcoordinates_set.create(
+                row=row,
+                column=column,
+                hit=False)
         else:
-            raise ValidationError(_(''))
+            raise ValidationError(_('No more coordinates allowed.'))
 
 
 class ShipCoordinates(models.Model):
