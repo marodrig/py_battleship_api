@@ -8,7 +8,7 @@ from django.test.utils import setup_test_environment, teardown_test_environment
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Game, Tile, Ship
+from ..models import Game, Tile, Ship
 
 # Create your tests here.
 
