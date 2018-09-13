@@ -59,7 +59,7 @@ def get_alive_ships(request, game_id):
     """
     if request.method == 'GET':
         game_inst = get_object_or_404(Game, pk=game_id)
-        ships_left = game_inst.ship_set.filter(isalive=True)
+        ships_left = game_inst.ship_set.filter(is_alive=True)
         return HttpResponse(serialize('json', ships_left))
     return HttpResponse(status=405)
 
@@ -83,18 +83,12 @@ def get_post_game_ships(request, game_id):
         game_ships = game_inst.ship_set.all()
         return HttpResponse(serialize('json', game_ships))
     elif request.method == 'POST':
-        json_data = json.loads(request.body.decode('utf-8'))
-        random_placement = json_data.get('randomPlacement', False)
-        print(request.POST)
-        if random_placement:
-            game_inst.rand_init_ships()
-            ships_created = game_inst.ship_set.all().count()
-            data = {
-                'shipsCreated': ships_created,
-            }
-            return JsonResponse(data=data, status=201)
-        else:
-            return JsonResponse(data=request.POST)
+        game_inst.rand_init_ships()
+        ships_created = game_inst.ship_set.all().count()
+        data = {
+            'shipsCreated': ships_created,
+        }
+        return JsonResponse(data=data, status=201)
     else:
         return HttpResponse(status=405)
 

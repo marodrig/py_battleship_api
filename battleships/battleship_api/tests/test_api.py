@@ -21,13 +21,38 @@ class APITest(TestCase):
     def tearDownTestData(cls):
         pass
 
-    # def test_get_request_for_games(self):
-    #     response = self.client.get(reverse('games'))
-    #     self.assertEqual(response.status_code, 200)
+    def test_get_request_for_games(self):
+        response = self.client.get(reverse('get_post_games'))
+        self.assertEqual(response.status_code, 200)
 
-    # def test_get_detail_for_game(self):
-    #     response = self.client.get(reverse('get_game', kwargs={'game_id': int(1)}))
-    #     self.assertEqual(response.status_code, 200)
+    def test_not_allowed_method_for_games(self):
+        url = reverse('get_post_games')
+        response = self.client.patch(url)
+        self.assertEqual(response.status_code, 405)
+
+    def test_post_request_for_games(self):
+        response = self.client.post(reverse('get_post_games'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_request_for_games(self):
+        url = reverse('get_delete_patch_game', kwargs={'game_id': int(1)})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_request_for_game_ships(self):
+        url = reverse('get_post_game_ships', kwargs={'game_id': int(1)})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_request_for_game_ships(self):
+        url = reverse('get_post_game_ships', kwargs={'game_id': int(1)})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 201)
+
+    def test_get_request_for_live_ships(self):
+        url = reverse('get_alive_ships', kwargs={'game_id': int(1)})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
 
     # def test_place_ship(self):
     #     url = reverse('place_ship', kwargs={'game_id': int(1)})

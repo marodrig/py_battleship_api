@@ -127,7 +127,7 @@ class Ship(models.Model):
         """
         return "ship orientation:{0} tiles:{1}".format(
             self.orientation,
-            self.tile_size,
+            self.length,
         )
 
     def add_coord(self, row, column):
