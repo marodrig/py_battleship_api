@@ -22,7 +22,7 @@ class APITest(TestCase):
         pass
 
     def test_get_request_for_games(self):
-        response = self.client.get(reverse('get_post_games'))
+        response = self.client.get(reverse('game-list'))
         self.assertEqual(response.status_code, 200)
 
     def test_not_allowed_method_for_games(self):
