@@ -6,17 +6,42 @@ import json
 
 from django.core.serializers import serialize
 from django.db import DatabaseError, DataError
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import (Http404, HttpResponse,
+                         HttpRequest, HttpResponseNotAllowed)
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Game, Ship, ShipCoordinates
+from .serializers import (GameSerializer, ShipCoordinatesSerializer,
+                          ShipSerializer)
 
 # Create your views here.
 
 
-@csrf_exempt
+class GameList(APIView):
+    """
+    List all games, or create a new Game
+
+    """
+    def get(self, request, format=None):
+        """
+        """
+        games = Game.objects.all()
+        serializer = GameSerializer(games, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        """
+        """
+        serializer = GameSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 def get_post_games(request):
     """
     Creates a new entry in the Games table for a POST request
@@ -32,7 +57,7 @@ def get_post_games(request):
         games_list = Game.objects.all()
         return HttpResponse(serialize('json', games_list))
     else:
-        return HttpResponse(status=405)
+        return HttpResponseNotAllowed()
 
 
 def get_delete_patch_game(request, game_id):
@@ -74,7 +99,6 @@ def get_game_coordinates(request, game_id):
     return HttpResponse(status=405)
 
 
-@csrf_exempt
 def get_post_game_ships(request, game_id):
     """
     """
