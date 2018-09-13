@@ -1,11 +1,11 @@
 from django.urls import path
+from rest_framework.urlpatterns import format_suffix_patterns
 
 from . import views
 
 urlpatterns = [
     path('games/',
-         views.get_post_games,
-         name='get_post_games'),
+         views.GameList.as_view()),
     path('games/<int:game_id>/',
          views.get_delete_patch_game,
          name='get_delete_patch_game'),
@@ -28,3 +28,5 @@ urlpatterns = [
          views.get_ship_coordinates,
          name='get_ship_coordinates'),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)
