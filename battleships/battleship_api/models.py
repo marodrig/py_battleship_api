@@ -42,6 +42,19 @@ class Game(models.Model):
         if numb_ships_left == 0:
             self.is_over = True
 
+    def check_torpedo_hit(self, row, column):
+        """
+        """
+        coord_inst = None
+        try:
+            coord_inst = self.shipcoordinates_set.get(row=row, column=column)
+        except ShipCoordinates.DoesNotExist as dne:
+            return 'Miss'
+        if coord_inst:
+            coord_inst.hit = True
+            coord_inst.save()
+            return 'Hit'
+
 
 class Ship(models.Model):
     """
