@@ -6,8 +6,9 @@ import json
 
 from django.core.serializers import serialize
 from django.db import DatabaseError, DataError
-from django.http import (Http404, HttpResponse,
-                         HttpRequest, HttpResponseNotAllowed)
+from django.http import (Http404, HttpRequest, HttpResponse,
+                         HttpResponseBadRequest, HttpResponseNotAllowed,
+                         HttpResponseServerError)
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from rest_framework import status
@@ -26,6 +27,8 @@ class GameList(APIView):
     List all games, or create a new Game
 
     """
+    queryset = Game.objects.all()
+
     def get(self, request, format=None):
         """
         """
@@ -36,8 +39,13 @@ class GameList(APIView):
     def post(self, request, format=None):
         """
         """
-        serializer = GameSerializer(data=request.data)
+        # serializer = GameSerializer(data=request.data)
+        data = {
+            'start_date': timezone.now(),
+        }
+        serializer = GameSerializer(data=data)
         if serializer.is_valid():
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
