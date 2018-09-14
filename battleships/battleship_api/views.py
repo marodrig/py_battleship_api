@@ -172,12 +172,12 @@ def put_play(request, game_id):
     col_from_req = request.data['column']
     game_inst = get_object_or_404(Game, pk=game_id)
     try:
-        coord_inst = game_inst.shipcoordinates_set.get(
-            row=row_from_req,
-            column=col_from_req)
+        coord_inst = game_inst.shipcoordinate_set.get(
+            ship_row=row_from_req,
+            ship_col=col_from_req)
         coord_inst.hit = True
         data['hit'] = coord_inst.hit
-    except ShipCoordinates.DoesNotExist:
+    except ShipCoordinate.DoesNotExist:
         data['hit'] = False
     return Response(data=data)
 
