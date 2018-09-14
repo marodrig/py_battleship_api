@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
+# Django models below.
 
 
 class Game(models.Model):
@@ -100,7 +100,8 @@ class Ship(models.Model):
         """
         """
         used_coordinates_set = set()
-        valid_range = [x for x in range(ShipCoordinates.MIN_COORDINATE, ShipCoordinates.MAX_COORDINATE)]
+        valid_range = [x for x in range(ShipCoordinates.MIN_COORDINATE,
+                                        ShipCoordinates.MAX_COORDINATE)]
         while self.shipcoordinates_set.count() < self.length:
             row, column = random.choice(valid_range), random.choice(valid_range)
             if (row, column) in used_coordinates_set:
