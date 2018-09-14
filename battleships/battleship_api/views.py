@@ -17,8 +17,8 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    UpdateModelMixin)
 from rest_framework.response import Response
 
-from .models import Game, Ship, ShipCoordinates
-from .serializers import (GameSerializer, ShipCoordinatesSerializer,
+from .models import Game, Ship, ShipCoordinate
+from .serializers import (GameSerializer, ShipCoordinateSerializer,
                           ShipSerializer)
 
 # Django method views and class views below.
@@ -167,21 +167,26 @@ def get_post_game_ships(request, game_id):
 def put_play(request, game_id):
     """
     """
-    print(request.data)
+    data = {}
+    row_from_req = request.data['row']
+    col_from_req = request.data['column']
     game_inst = get_object_or_404(Game, pk=game_id)
-    # coord_inst = game_inst.shipcoordinates_set.get(row=row, column=column)
-    data = {
-        'hit': False,
-    }
+    try:
+        coord_inst = game_inst.shipcoordinates_set.get(
+            row=row_from_req,
+            column=col_from_req)
+        coord_inst.hit = True
+        data['hit'] = coord_inst.hit
+    except ShipCoordinates.DoesNotExist:
+        data['hit'] = False
     return Response(data=data)
 
 
+@api_view(['GET'])
 def get_ship_coordinates(request, ship_id):
     """
     """
-    if request.method == 'GET':
-        ship_inst = get_object_or_404(Ship, pk=ship_id)
-        ship_coordinates = ship_inst.shipcoordinates_set.all()
-        return HttpResponse(serialize('json', ship_coordinates))
-    else:
-        return HttpResponse(status=405)
+    ship_inst = get_object_or_404(Ship, pk=ship_id)
+    ship_coordinates = ship_inst.shipcoordinate_set.all()
+    serializer = ShipCoordinateSerializer(ship_coordinates, many=True)
+    return Response(serializer.data)

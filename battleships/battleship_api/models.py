@@ -28,7 +28,7 @@ class Game(models.Model):
                                            len(Ship.TYPE_CHOICES))
             for ship_type in rand_ship_type:
                 rand_orientation = random.choice(Ship.ORIENTATION_CHOICES)
-                self.ship_set.create(orientation=rand_orientation,
+                self.ship_set.create(orientation=rand_orientation[0],
                                      length=ship_type)
             for ship in self.ship_set.all():
                 ship.rand_ship_position()
@@ -100,8 +100,8 @@ class Ship(models.Model):
         """
         """
         used_coordinates_set = set()
-        valid_range = [x for x in range(ShipCoordinates.MIN_COORDINATE,
-                                        ShipCoordinates.MAX_COORDINATE)]
+        valid_range = [x for x in range(ShipCoordinate.MIN_COORDINATE,
+                                        ShipCoordinate.MAX_COORDINATE)]
         while self.shipcoordinates_set.count() < self.length:
             row, column = random.choice(valid_range), random.choice(valid_range)
             if (row, column) in used_coordinates_set:
@@ -157,7 +157,7 @@ class Ship(models.Model):
             raise ValidationError(_('No more coordinates allowed.'))
 
 
-class ShipCoordinates(models.Model):
+class ShipCoordinate(models.Model):
     """
     Tile related to a given ship in a given game
 
@@ -176,16 +176,16 @@ class ShipCoordinates(models.Model):
         on_delete=models.CASCADE,
     )
     hit = models.BooleanField(default=False)
-    row = models.IntegerField()
-    column = models.IntegerField()
+    ship_row = models.IntegerField()
+    ship_col = models.IntegerField()
 
     def __str__(self):
         """
         """
 
         return "Row:{0} column:{1} hit:{2}".format(
-            self.row,
-            self.column,
+            self.ship_row,
+            self.ship_col,
             self.hit,
             )
 

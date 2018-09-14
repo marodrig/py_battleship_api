@@ -3,7 +3,7 @@ Serializers for the battleship REST API
 
 """
 from rest_framework import serializers
-from .models import Game, Ship, ShipCoordinates
+from .models import Game, Ship, ShipCoordinate
 
 
 class GameSerializer(serializers.ModelSerializer):
@@ -35,17 +35,17 @@ class ShipSerializer(serializers.ModelSerializer):
         unique_together = ('game', 'orientation')
 
 
-class ShipCoordinatesSerializer(serializers.ModelSerializer):
+class ShipCoordinateSerializer(serializers.ModelSerializer):
     """
     Serializer for the ShipCoordinates Model
 
     """
     class Meta:
-        model = ShipCoordinates
+        model = ShipCoordinate
         fields = (
             'id',
             'ship',
             'game',
             'hit',
-            'row',
-            'column')
+            'ship_row',
+            'ship_col')
