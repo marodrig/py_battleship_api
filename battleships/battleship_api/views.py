@@ -164,24 +164,16 @@ def get_post_game_ships(request, game_id):
 
 
 @api_view(['POST'])
-def post_play(request, game_id):
+def put_play(request, game_id):
     """
     """
-    row = int(request.data['row'])
-    column = int(request.data['column'])
+    print(request.data)
     game_inst = get_object_or_404(Game, pk=game_id)
-    coord_inst = game_inst.shipcoordinates_set.get(row=row, column=column)
-    if coord_inst and not coord_inst.hit:
-        coord_inst.hit = True
-        data = {
-            'hit': coord_inst.hit,
-        }
-        return Response(data=data)
-    else:
-        data = {
-            'hit': False,
-        }
-        return Response(data=data)
+    # coord_inst = game_inst.shipcoordinates_set.get(row=row, column=column)
+    data = {
+        'hit': False,
+    }
+    return Response(data=data)
 
 
 def get_ship_coordinates(request, ship_id):
