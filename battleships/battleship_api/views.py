@@ -10,13 +10,12 @@ from django.http import (Http404, HttpRequest, HttpResponse,
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin,
                                    UpdateModelMixin)
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.decorators import api_view
 
 from .models import Game, Ship, ShipCoordinates
 from .serializers import (GameSerializer, ShipCoordinatesSerializer,
@@ -123,6 +122,7 @@ class ShipDetails(RetrieveModelMixin, UpdateModelMixin,
         """
         return self.destroy(request, *args, **kwargs)
 
+
 @api_view(['GET'])
 def get_alive_ships(request, game_id):
     """
@@ -133,7 +133,6 @@ def get_alive_ships(request, game_id):
     ships_left = game_inst.ship_set.filter(is_alive=True)
     serializer = ShipSerializer(ships_left, many=True)
     return Response(serializer.data)
-    # return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def get_game_coordinates(request, game_id):
@@ -146,32 +145,43 @@ def get_game_coordinates(request, game_id):
     return HttpResponse(status=405)
 
 
+@api_view(['GET', 'POST'])
 def get_post_game_ships(request, game_id):
     """
     """
     game_inst = get_object_or_404(Game, pk=game_id)
-    if request.method == 'GET':
-        game_ships = game_inst.ship_set.all()
-        return HttpResponse(serialize('json', game_ships))
-    elif request.method == 'POST':
+    if request.method == 'POST':
         game_inst.rand_init_ships()
         ships_created = game_inst.ship_set.all().count()
         data = {
-            'shipsCreated': ships_created,
+            'ships_created': ships_created,
         }
-        return JsonResponse(data=data, status=201)
-    else:
-        return HttpResponse(status=405)
-
-
-def get_ships(request):
-    """
-    """
+        return Response(data=data)
     if request.method == 'GET':
-        all_ships = Ship.objects.all()
-        return HttpResponse(serialize('json', all_ships))
+        game_ships = game_inst.ship_set.all()
+        serializer = ShipSerializer(game_ships, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['POST'])
+def post_play(request, game_id):
+    """
+    """
+    row = int(request.data['row'])
+    column = int(request.data['column'])
+    game_inst = get_object_or_404(Game, pk=game_id)
+    coord_inst = game_inst.shipcoordinates_set.get(row=row, column=column)
+    if coord_inst and not coord_inst.hit:
+        coord_inst.hit = True
+        data = {
+            'hit': coord_inst.hit,
+        }
+        return Response(data=data)
     else:
-        return HttpResponse(status=405)
+        data = {
+            'hit': False,
+        }
+        return Response(data=data)
 
 
 def get_ship_coordinates(request, ship_id):
@@ -181,17 +191,5 @@ def get_ship_coordinates(request, ship_id):
         ship_inst = get_object_or_404(Ship, pk=ship_id)
         ship_coordinates = ship_inst.shipcoordinates_set.all()
         return HttpResponse(serialize('json', ship_coordinates))
-    else:
-        return HttpResponse(status=405)
-
-
-def get_ship_status(request, ship_id):
-    """
-    Returns the detail of a ship
-
-    """
-    if request.method == 'GET':
-        ship_inst = get_object_or_404(Ship, pk=ship_id)
-        return JsonResponse(ship_inst, safe=False)
     else:
         return HttpResponse(status=405)
