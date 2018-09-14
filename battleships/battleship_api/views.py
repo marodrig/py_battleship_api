@@ -2,8 +2,6 @@
 Controllers for the Battleship application
 
 """
-import json
-
 from django.core.serializers import serialize
 from django.db import DatabaseError, DataError
 from django.http import (Http404, HttpRequest, HttpResponse,
@@ -12,89 +10,130 @@ from django.http import (Http404, HttpRequest, HttpResponse,
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 
 from .models import Game, Ship, ShipCoordinates
 from .serializers import (GameSerializer, ShipCoordinatesSerializer,
                           ShipSerializer)
 
-# Create your views here.
+# Django method views and class views below.
 
 
-class GameList(APIView):
+class GameList(ListModelMixin, CreateModelMixin, GenericAPIView):
     """
-    List all games, or create a new Game
+    API endpoint to retrieve all games, or create a new Game
 
     """
     queryset = Game.objects.all()
+    serializer_class = GameSerializer
 
-    def get(self, request, format=None):
+    def get(self, request, *args, **kwargs):
         """
-        """
-        games = Game.objects.all()
-        serializer = GameSerializer(games, many=True)
-        return Response(serializer.data)
+        API endpoint for GET requests of Game objects
 
-    def post(self, request, format=None):
+        :return: json array of Game objects with id, is_over, and start_date
+
         """
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
         """
-        # serializer = GameSerializer(data=request.data)
-        data = {
-            'start_date': timezone.now(),
-        }
-        serializer = GameSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        API endpoint for POST requests of Game objects
+
+        :return: HTTP_201 if object was created
+        :return: HTTP_400 for a bad request
+
+        """
+        return self.create(request, *args, **kwargs)
 
 
-def get_post_games(request):
+class GameDetail(RetrieveModelMixin,
+                 UpdateModelMixin,
+                 DestroyModelMixin,
+                 GenericAPIView):
     """
-    Creates a new entry in the Games table for a POST request
-    Returns all the rows in the Games table for a GET request
-
-    """
-    if request.method == 'POST':
-        game = Game.objects.create(start_date=timezone.now())
-        response = HttpResponse()
-        response['location'] = "battleship/api/v1/games/{0}/".format(game.pk)
-        return response
-    elif request.method == 'GET':
-        games_list = Game.objects.all()
-        return HttpResponse(serialize('json', games_list))
-    else:
-        return HttpResponseNotAllowed()
-
-
-def get_delete_patch_game(request, game_id):
-    """
-    Returns a row from the Games table for the given game_id
+    Class used to retrieve, delete, or update a Game object
 
     """
-    if request.method == 'GET':
-        game_inst = get_object_or_404(Game, pk=game_id)
-        return HttpResponse(serialize('json', game_inst.ship_set.all()))
-    elif request.method == 'DELETE':
-        game_inst = get_object_or_404(Game, pk=game_id)
-        game_inst.delete()
-        game_inst.save()
-        return HttpResponse('Deleted record with id: {}'.format(game_id))
-    elif request.method == 'PATCH':
-        update_game_from_req(request)
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        """
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        """
+        """
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        """
+        return self.destroy(request, *args, **kwargs)
 
 
+class ShipList(ListModelMixin, CreateModelMixin, GenericAPIView):
+    """
+    Class used to list, and create ship objects
+
+    """
+    queryset = Ship.objects.all()
+    serializer_class = ShipSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        """
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """
+        """
+        return self.create(request, *args, **kwargs)
+
+
+class ShipDetails(RetrieveModelMixin, UpdateModelMixin,
+                  DestroyModelMixin, GenericAPIView):
+    """
+    Class used to retrieve, update, or destroy a Ship object
+
+    """
+    queryset = Ship.objects.all()
+    serializer_class = ShipSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        """
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        """
+        """
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        """
+        return self.destroy(request, *args, **kwargs)
+
+@api_view(['GET'])
 def get_alive_ships(request, game_id):
     """
     Returns the ships still in the game
 
     """
-    if request.method == 'GET':
-        game_inst = get_object_or_404(Game, pk=game_id)
-        ships_left = game_inst.ship_set.filter(is_alive=True)
-        return HttpResponse(serialize('json', ships_left))
-    return HttpResponse(status=405)
+    game_inst = get_object_or_404(Game, pk=game_id)
+    ships_left = game_inst.ship_set.filter(is_alive=True)
+    serializer = ShipSerializer(ships_left, many=True)
+    return Response(serializer.data)
+    # return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def get_game_coordinates(request, game_id):
@@ -125,20 +164,6 @@ def get_post_game_ships(request, game_id):
         return HttpResponse(status=405)
 
 
-def get_post_ships(request):
-    """
-    """
-    pass
-
-
-def update_game_from_req(request):
-    """
-    PATCH verb for the game object
-
-    """
-    return HttpResponse('Work in progress')
-
-
 def get_ships(request):
     """
     """
@@ -158,12 +183,6 @@ def get_ship_coordinates(request, ship_id):
         return HttpResponse(serialize('json', ship_coordinates))
     else:
         return HttpResponse(status=405)
-
-
-def get_ship(request, shipd_id):
-    """
-    """
-    return HttpResponse("Place holder, work in progress.")
 
 
 def get_ship_status(request, ship_id):
