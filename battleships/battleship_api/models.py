@@ -188,14 +188,3 @@ class ShipCoordinate(models.Model):
             self.ship_col,
             self.hit,
             )
-
-    def validate_coordinate(value):
-        """
-        Validates if starting from this tile the position will be valid.
-
-        """
-        if value < 1 or value > 10:
-            raise ValidationError(
-                _('%(value) is out of range. Must be between 1 and 10.'),
-                params={'value': value},
-            )
