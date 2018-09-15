@@ -102,35 +102,35 @@ class Ship(models.Model):
         used_coordinates_set = set()
         valid_range = [x for x in range(ShipCoordinate.MIN_COORDINATE,
                                         ShipCoordinate.MAX_COORDINATE)]
-        while self.shipcoordinates_set.count() < self.length:
+        while self.shipcoordinate_set.count() < self.length:
             row, column = random.choice(valid_range), random.choice(valid_range)
             if (row, column) in used_coordinates_set:
                 continue
             else:
                 used_coordinates_set.add((row, column))
-                self.shipcoordinates_set.create(
+                self.shipcoordinate_set.create(
                     game=self.game,
-                    row=row,
-                    column=column)
+                    ship_row=row,
+                    ship_col=column)
                 for x in range(self.length - 1):
                     if self.orientation == Ship.HORIZONTAL:
                         column += 1
                     elif self.orientation == Ship.VERTICAL:
                         row += 1
-                    self.shipcoordinates_set.create(game=self.game,
-                                                    row=row,
-                                                    column=column)
+                    self.shipcoordinate_set.create(game=self.game,
+                                                    ship_row=row,
+                                                    ship_col=column)
                     used_coordinates_set.add((row, column))
 
     def get_num_hits(self):
         """
         """
-        return self.shipcoordinates_set.filter(hit=True).count()
+        return self.shipcoordinate_set.filter(hit=True).count()
 
     def update_state(self):
         """
         """
-        num_hits = self.shipcoordinates_set.filter(hit=True).count()
+        num_hits = self.shipcoordinate_set.filter(hit=True).count()
         if num_hits == self.length:
             self.is_alive = False
 
@@ -148,10 +148,10 @@ class Ship(models.Model):
         """
         """
         # TODO check for repeated coordinates
-        if self.shipcoordinates_set.all().count() < self.length:
-            self.shipcoordinates_set.create(
-                row=row,
-                column=column,
+        if self.shipcoordinate_set.all().count() < self.length:
+            self.shipcoordinate_set.create(
+                ship_row=row,
+                ship_col=column,
                 hit=False)
         else:
             raise ValidationError(_('No more coordinates allowed.'))

@@ -5,7 +5,7 @@ from django.test.utils import setup_test_environment, teardown_test_environment
 from django.urls import reverse
 from django.utils import timezone
 
-from ..models import Game, ShipCoordinates, Ship
+from ..models import Game, ShipCoordinate, Ship
 
 
 class APITest(TestCase):
@@ -14,8 +14,12 @@ class APITest(TestCase):
         game_inst = Game.objects.create(start_date=timezone.now())
         ship_inst = game_inst.ship_set.create(orientation=Ship.HORIZONTAL,
                                               length=Ship.CARRIER,
-                                              is_alive=True)
-        ship_inst.shipcoordinates_set.create(hit=False, row=int(1), column=int(1))
+                                              is_alive=True,
+                                              )
+        ship_inst.shipcoordinate_set.create(hit=False,
+                                            ship_row=int(1),
+                                            ship_col=int(1),
+                                            )
 
     @classmethod
     def tearDownTestData(cls):
