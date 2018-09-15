@@ -31,4 +31,9 @@ class APITest(TestCase):
 
     def test_post_request_for_games(self):
         response = self.client.post(reverse('game-list'))
+        self.assertEqual(response.status_code, 201)
+
+    def test_get_request_for_game_details(self):
+        url = reverse('game-details', args={'pk': int(1)})
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

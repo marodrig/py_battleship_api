@@ -17,7 +17,7 @@ class Game(models.Model):
     """
     NUMBER_SHIPS_ALLOWED = 5
 
-    start_date = models.DateTimeField('date started')
+    start_date = models.DateTimeField('date started', auto_now_add=True)
     is_over = models.BooleanField(default=False)
 
     def rand_init_ships(self):
@@ -183,7 +183,7 @@ class ShipCoordinate(models.Model):
         """
         """
 
-        return "Row:{0} column:{1} hit:{2}".format(
+        return "Row: {0} column: {1} hit: {2}".format(
             self.ship_row,
             self.ship_col,
             self.hit,

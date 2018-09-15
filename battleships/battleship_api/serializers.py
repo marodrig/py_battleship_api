@@ -31,6 +31,7 @@ class ShipSerializer(serializers.ModelSerializer):
             'game',
             'orientation',
             'length',
+            'shipcoordinate_set',
             'is_alive')
         unique_together = ('game', 'orientation')
 
