@@ -34,6 +34,17 @@ class APITest(TestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_get_request_for_game_details(self):
-        url = reverse('game-details', args={'pk': int(1)})
+        url = reverse('game-details', kwargs={'pk': int(1)})
+        # self.client.post(url, data = {})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_update_game_details(self):
+        url = reverse('game-details', kwargs={'pk': int(1)})
+        response = self.client.put(url, data={'is_over': True})
+        self.assertEquals(response.status_code, 200)
+
+    def test_delete_request_game_details(self):
+        url = reverse('game-details', kwargs={'pk': int(1)})
+        response = self.client.delete(url)
+        self.assertEquals(response.status_code, 204)
