@@ -8,22 +8,35 @@ from django.utils import timezone
 from ..models import Game, ShipCoordinate, Ship
 
 
-class APITest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        game_inst = Game.objects.create(start_date=timezone.now())
-        ship_inst = game_inst.ship_set.create(orientation=Ship.HORIZONTAL,
-                                              length=Ship.CARRIER,
-                                              is_alive=True,
-                                              )
-        ship_inst.shipcoordinate_set.create(hit=False,
-                                            ship_row=int(1),
-                                            ship_col=int(1),
-                                            )
+class BaseTest(TestCase):
+    """
+    Base class for test cases for this  module
 
-    @classmethod
-    def tearDownTestData(cls):
-        pass
+    """
+
+    def setUp(self):
+        self.game_inst = Game.objects.create(start_date=timezone.now())
+        self.ship_inst = self.game_inst.ship_set.create(
+            orientation=Ship.HORIZONTAL,
+            length=Ship.CARRIER,
+            is_alive=True,
+        )
+        self.ship_inst.shipcoordinate_set.create(
+            hit=False,
+            ship_row=int(1),
+            ship_col=int(1),
+        )
+    
+    def tearDown(self):
+        self.game_inst.delete()
+        self.ship_inst.delete()
+
+
+class TestOfAPIEndpoints(BaseTest):
+    """
+    Class used to test REST API endpoints
+
+    """
 
     def test_get_request_for_games(self):
         response = self.client.get(reverse('game-list'))
