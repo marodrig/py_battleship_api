@@ -11,14 +11,24 @@ from ..models import Game, Ship, ShipCoordinate
 # Create your tests here.
 
 
-class ModelsTests(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.game_inst = Game.objects.create(start_date=timezone.now())
+class BaseTest(TestCase):
+    """
+    Base class for test cases of thise module
 
-    @classmethod
-    def tearDownTestData(cls):
-        pass
+    """
+
+    def setUp(self):
+        self.game_inst = Game.objects.create(start_date=timezone.now())
+
+    def tearDown(self):
+        self.game_inst.delete()
+
+
+class TestOfModels(BaseTest):
+    """
+    Class used to test Django's ORM models for this application.
+
+    """
 
     def test_game_is_created(self):
         """
