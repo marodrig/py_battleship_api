@@ -16,7 +16,8 @@ class GameSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'is_over',
-            'start_date')
+            'start_date',
+            'ship_set')
 
 
 class ShipSerializer(serializers.ModelSerializer):

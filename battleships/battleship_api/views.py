@@ -163,7 +163,7 @@ def get_post_game_ships(request, game_id):
         return Response(serializer.data)
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 def put_play(request, game_id):
     """
     """
