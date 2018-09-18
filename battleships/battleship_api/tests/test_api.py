@@ -26,7 +26,7 @@ class BaseTest(TestCase):
             ship_row=int(1),
             ship_col=int(1),
         )
-    
+
     def tearDown(self):
         self.game_inst.delete()
         self.ship_inst.delete()
@@ -47,13 +47,13 @@ class TestOfAPIEndpoints(BaseTest):
         self.assertEqual(response.status_code, 201)
 
     def test_get_request_for_game_details(self):
-        url = reverse('game-details', kwargs={'pk': int(1)})
+        url = reverse('game-details', args=(self.game_inst.pk, ))
         # self.client.post(url, data = {})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
     def test_update_game_details(self):
-        url = reverse('game-details', kwargs={'pk': int(1)})
+        url = reverse('game-details', args=(self.game_inst.pk, ))
         response = self.client.put(url, data={'is_over': True})
         self.assertEquals(response.status_code, 200)
 
@@ -61,3 +61,8 @@ class TestOfAPIEndpoints(BaseTest):
         url = reverse('game-details', kwargs={'pk': int(1)})
         response = self.client.delete(url)
         self.assertEquals(response.status_code, 204)
+
+    def test_get_alive_ship_list(self):
+        url = reverse('get_alive_ships', args=(self.game_inst.pk, ))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
