@@ -6,25 +6,12 @@ from rest_framework import serializers
 from .models import Game, Ship, ShipCoordinate
 
 
-class GameSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Game Model
-
-    """
-    class Meta:
-        model = Game
-        fields = (
-            'id',
-            'is_over',
-            'start_date',
-            'ship_set')
-
-
 class ShipSerializer(serializers.ModelSerializer):
     """
     Serializer for the Ship Model
 
     """
+
     class Meta:
         model = Ship
         fields = (
@@ -32,9 +19,23 @@ class ShipSerializer(serializers.ModelSerializer):
             'game',
             'orientation',
             'length',
-            'shipcoordinate_set',
             'is_alive')
-        unique_together = ('game', 'orientation')
+
+
+class GameSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Game Model
+
+    """
+    ships = ShipSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Game
+        fields = (
+            'id',
+            'is_over',
+            'start_date',
+            'ships')
 
 
 class ShipCoordinateSerializer(serializers.ModelSerializer):
