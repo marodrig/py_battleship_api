@@ -2,6 +2,8 @@
 Controllers for the Battleship application
 
 """
+import json
+
 from django.core.serializers import serialize
 from django.db import DatabaseError, DataError
 from django.http import (Http404, HttpRequest, HttpResponse,
@@ -167,6 +169,7 @@ def get_post_game_ships(request, game_id):
 def put_play(request, game_id):
     """
     """
+    print(request.data)
     data = {}
     row_from_req = request.data['row']
     col_from_req = request.data['column']
