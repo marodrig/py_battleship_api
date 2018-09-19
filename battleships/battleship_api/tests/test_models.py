@@ -19,6 +19,7 @@ class BaseTest(TestCase):
 
     def setUp(self):
         self.game_inst = Game.objects.create(start_date=timezone.now())
+        self.game_inst.shipcoordinate_set.create(ship_row=1, ship_col=1)
 
     def tearDown(self):
         self.game_inst.delete()
@@ -29,6 +30,20 @@ class TestOfModels(BaseTest):
     Class used to test Django's ORM models for this application.
 
     """
+
+    def test_hit(self):
+        game_board = self.game_inst.build_board()
+        result_play = self.game_inst.check_hit(game_board, 1, 1)
+        self.assertTrue(result_play)
+
+    def test_miss(self):
+        game_board = self.game_inst.build_board()
+        result_play = self.game_inst.check_hit(game_board, 2, 2)
+        self.assertFalse(result_play)
+
+    def test_created_board_game(self):
+        game_board = self.game_inst.build_board()
+        self.assertIsNotNone(game_board)
 
     def test_game_is_created(self):
         """

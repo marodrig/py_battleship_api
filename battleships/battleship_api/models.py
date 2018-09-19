@@ -42,18 +42,26 @@ class Game(models.Model):
         if numb_ships_left == 0:
             self.is_over = True
 
-    def check_torpedo_hit(self, row, column):
+    def build_board(self):
+        """
+        Generates a dictionary with all the ships coordinates
+
+        :return game_board: Dictionary representation of ship locations
+        :game_board type: dictionary
+
+        """
+        game_board = {}
+        game_coordinates = self.shipcoordinate_set.all()
+        for coordinate in game_coordinates:
+            coord_tuple = (coordinate.ship_row, coordinate.ship_col)
+            game_board[coord_tuple] = coordinate.hit
+        return game_board
+
+    def check_hit(self, game_board, row, column):
         """
         """
-        coord_inst = None
-        try:
-            coord_inst = self.shipcoordinates_set.get(row=row, column=column)
-        except ShipCoordinates.DoesNotExist as dne:
-            return 'Miss'
-        if coord_inst:
-            coord_inst.hit = True
-            coord_inst.save()
-            return 'Hit'
+        hit_tuple = (row, column)
+        return hit_tuple in game_board
 
 
 class Ship(models.Model):
