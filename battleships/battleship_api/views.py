@@ -8,7 +8,7 @@ from django.core.serializers import serialize
 from django.db import DatabaseError, DataError
 from django.http import (Http404, HttpRequest, HttpResponse,
                          HttpResponseBadRequest, HttpResponseNotAllowed,
-                         HttpResponseServerError)
+                         HttpResponseServerError, QueryDict)
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from rest_framework import status
@@ -169,16 +169,18 @@ def get_post_game_ships(request, game_id):
 def put_play(request, game_id):
     """
     """
-    print(request.data)
     data = {}
-    row_from_req = request.data['row']
-    col_from_req = request.data['column']
+    put_req = QueryDict(request.body)
+    print(put_req)
+    row_from_req = put_req.get('row', -1)
+    col_from_req = put_req.get('column', -1)
     game_inst = get_object_or_404(Game, pk=game_id)
     try:
         coord_inst = game_inst.shipcoordinate_set.get(
             ship_row=row_from_req,
             ship_col=col_from_req)
         coord_inst.hit = True
+        coord_inst.save()
         data['hit'] = coord_inst.hit
     except ShipCoordinate.DoesNotExist:
         data['hit'] = False
