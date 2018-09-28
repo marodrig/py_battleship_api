@@ -17,7 +17,7 @@ class Game(models.Model):
     """
     NUMBER_SHIPS_ALLOWED = 5
 
-    start_date = models.DateTimeField('date started')
+    start_date = models.DateTimeField('date started', auto_now_add=True)
     is_over = models.BooleanField(default=False)
 
     def rand_init_ships(self):
@@ -26,10 +26,14 @@ class Game(models.Model):
         while self.ship_set.count() < self.NUMBER_SHIPS_ALLOWED:
             rand_ship_type = random.sample([x[0] for x in Ship.TYPE_CHOICES],
                                            len(Ship.TYPE_CHOICES))
+            ships_list = []
             for ship_type in rand_ship_type:
                 rand_orientation = random.choice(Ship.ORIENTATION_CHOICES)
-                self.ship_set.create(orientation=rand_orientation,
-                                     length=ship_type)
+                ship_object = Ship(game=self,
+                                   orientation=rand_orientation[0],
+                                   length=ship_type)
+                ships_list.append(ship_object)
+            Ship.objects.bulk_create(ships_list)
             for ship in self.ship_set.all():
                 ship.rand_ship_position()
 
@@ -42,18 +46,26 @@ class Game(models.Model):
         if numb_ships_left == 0:
             self.is_over = True
 
-    def check_torpedo_hit(self, row, column):
+    def build_board(self):
+        """
+        Generates a dictionary with all the ships coordinates
+
+        :return game_board: Dictionary representation of ship locations
+        :game_board type: dictionary
+
+        """
+        game_board = {}
+        game_coordinates = self.shipcoordinate_set.all()
+        for coordinate in game_coordinates:
+            coord_tuple = (coordinate.ship_row, coordinate.ship_col)
+            game_board[coord_tuple] = coordinate.hit
+        return game_board
+
+    def check_hit(self, game_board, row, column):
         """
         """
-        coord_inst = None
-        try:
-            coord_inst = self.shipcoordinates_set.get(row=row, column=column)
-        except ShipCoordinates.DoesNotExist as dne:
-            return 'Miss'
-        if coord_inst:
-            coord_inst.hit = True
-            coord_inst.save()
-            return 'Hit'
+        hit_tuple = (row, column)
+        return hit_tuple in game_board
 
 
 class Ship(models.Model):
@@ -100,37 +112,41 @@ class Ship(models.Model):
         """
         """
         used_coordinates_set = set()
-        valid_range = [x for x in range(ShipCoordinates.MIN_COORDINATE,
-                                        ShipCoordinates.MAX_COORDINATE)]
-        while self.shipcoordinates_set.count() < self.length:
+        valid_range = [x for x in range(ShipCoordinate.MIN_COORDINATE,
+                                        ShipCoordinate.MAX_COORDINATE)]
+        while self.shipcoordinate_set.count() < self.length:
             row, column = random.choice(valid_range), random.choice(valid_range)
-            if (row, column) in used_coordinates_set:
-                continue
-            else:
+            if (row, column) not in used_coordinates_set:
                 used_coordinates_set.add((row, column))
-                self.shipcoordinates_set.create(
+                self.shipcoordinate_set.create(
                     game=self.game,
-                    row=row,
-                    column=column)
+                    ship_row=row,
+                    ship_col=column)
+                coords_list = []
                 for x in range(self.length - 1):
                     if self.orientation == Ship.HORIZONTAL:
                         column += 1
                     elif self.orientation == Ship.VERTICAL:
                         row += 1
-                    self.shipcoordinates_set.create(game=self.game,
-                                                    row=row,
-                                                    column=column)
+                    ship_coord_obj = ShipCoordinate(
+                        ship=self,
+                        game=self.game,
+                        ship_row=row,
+                        ship_col=column)
+                  
                     used_coordinates_set.add((row, column))
+                    coords_list.append(ship_coord_obj)
+                ShipCoordinate.objects.bulk_create(coords_list)
 
     def get_num_hits(self):
         """
         """
-        return self.shipcoordinates_set.filter(hit=True).count()
+        return self.shipcoordinate_set.filter(hit=True).count()
 
     def update_state(self):
         """
         """
-        num_hits = self.shipcoordinates_set.filter(hit=True).count()
+        num_hits = self.shipcoordinate_set.filter(hit=True).count()
         if num_hits == self.length:
             self.is_alive = False
 
@@ -148,16 +164,27 @@ class Ship(models.Model):
         """
         """
         # TODO check for repeated coordinates
-        if self.shipcoordinates_set.all().count() < self.length:
-            self.shipcoordinates_set.create(
-                row=row,
-                column=column,
+        if self.shipcoordinate_set.all().count() < self.length:
+            self.shipcoordinate_set.create(
+                ship_row=row,
+                ship_col=column,
                 hit=False)
         else:
             raise ValidationError(_('No more coordinates allowed.'))
 
 
-class ShipCoordinates(models.Model):
+def validate_coordinate(value):
+    """
+    Method used to validate a coordinate
+
+    """
+    if value > ShipCoordinate.MAX_COORDINATE or value < ShipCoordinate.MIN_COORDINATE:
+        raise ValidationError('Value must be between {0} and {1}.'.format(
+            ShipCoordinate.MIN_COORDINATE,
+            ShipCoordinate.MAX_COORDINATE))
+
+
+class ShipCoordinate(models.Model):
     """
     Tile related to a given ship in a given game
 
@@ -176,26 +203,15 @@ class ShipCoordinates(models.Model):
         on_delete=models.CASCADE,
     )
     hit = models.BooleanField(default=False)
-    row = models.IntegerField()
-    column = models.IntegerField()
+    ship_row = models.IntegerField(validators=[validate_coordinate])
+    ship_col = models.IntegerField(validators=[validate_coordinate])
 
     def __str__(self):
         """
         """
 
-        return "Row:{0} column:{1} hit:{2}".format(
-            self.row,
-            self.column,
+        return "Row: {0} column: {1} hit: {2}".format(
+            self.ship_row,
+            self.ship_col,
             self.hit,
-            )
-
-    def validate_coordinate(value):
-        """
-        Validates if starting from this tile the position will be valid.
-
-        """
-        if value < 1 or value > 10:
-            raise ValidationError(
-                _('%(value) is out of range. Must be between 1 and 10.'),
-                params={'value': value},
             )

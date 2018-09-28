@@ -4,22 +4,46 @@ Tests the models in the battleship application
 """
 
 from django.test import TestCase
-# from django.test.utils import setup_test_environment, teardown_test_environment
 from django.utils import timezone
 
-from ..models import Game, Ship, ShipCoordinates
+from ..models import Game, Ship, ShipCoordinate
 
 # Create your tests here.
 
 
-class ModelsTests(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.game_inst = Game.objects.create(start_date=timezone.now())
+class BaseTest(TestCase):
+    """
+    Base class for test cases of thise module
 
-    @classmethod
-    def tearDownTestData(cls):
-        pass
+    """
+
+    def setUp(self):
+        self.game_inst = Game.objects.create(start_date=timezone.now())
+        self.game_inst.shipcoordinate_set.create(ship_row=1, ship_col=1)
+
+    def tearDown(self):
+        self.game_inst.delete()
+
+
+class TestOfModels(BaseTest):
+    """
+    Class used to test Django's ORM models for this application.
+
+    """
+
+    def test_hit(self):
+        game_board = self.game_inst.build_board()
+        result_play = self.game_inst.check_hit(game_board, 1, 1)
+        self.assertTrue(result_play)
+
+    def test_miss(self):
+        game_board = self.game_inst.build_board()
+        result_play = self.game_inst.check_hit(game_board, 2, 2)
+        self.assertFalse(result_play)
+
+    def test_created_board_game(self):
+        game_board = self.game_inst.build_board()
+        self.assertIsNotNone(game_board)
 
     def test_game_is_created(self):
         """
@@ -102,7 +126,7 @@ class ModelsTests(TestCase):
             length=Ship.CARRIER,
             is_alive=True)
         ship_inst.add_coord(1, 2)
-        number_coordinates = ship_inst.shipcoordinates_set.all().count()
+        number_coordinates = ship_inst.shipcoordinate_set.all().count()
         self.assertEqual(1, number_coordinates)
 
     def test_randomized_ship_coordinates_for_CARRIER(self):
@@ -113,7 +137,7 @@ class ModelsTests(TestCase):
             length=Ship.CARRIER,
             is_alive=True)
         ship_inst.rand_ship_position()
-        number_coordinates = ship_inst.shipcoordinates_set.all().count()
+        number_coordinates = ship_inst.shipcoordinate_set.all().count()
         self.assertEqual(Ship.CARRIER, number_coordinates)
 
     def test_randomized_ship_coordinates_for_BATTLESHIP(self):
@@ -124,7 +148,7 @@ class ModelsTests(TestCase):
             length=Ship.BATTLESHIP,
             is_alive=True)
         ship_inst.rand_ship_position()
-        number_coordinates = ship_inst.shipcoordinates_set.all().count()
+        number_coordinates = ship_inst.shipcoordinate_set.all().count()
         self.assertEqual(Ship.BATTLESHIP, number_coordinates)
 
     def test_randomized_ship_coordinates_for_CRUISER(self):
@@ -135,7 +159,7 @@ class ModelsTests(TestCase):
             length=Ship.CRUISER,
             is_alive=True)
         ship_inst.rand_ship_position()
-        number_coordinates = ship_inst.shipcoordinates_set.all().count()
+        number_coordinates = ship_inst.shipcoordinate_set.all().count()
         self.assertEqual(Ship.CRUISER, number_coordinates)
 
     def test_randomized_ship_coordinates_for_SUBMARINE(self):
@@ -146,7 +170,7 @@ class ModelsTests(TestCase):
             length=Ship.SUBMARINE,
             is_alive=True)
         ship_inst.rand_ship_position()
-        number_coordinates = ship_inst.shipcoordinates_set.all().count()
+        number_coordinates = ship_inst.shipcoordinate_set.all().count()
         self.assertEqual(Ship.SUBMARINE, number_coordinates)
 
     def test_randomized_ship_coordinates_for_DESTROYER(self):
@@ -157,7 +181,7 @@ class ModelsTests(TestCase):
             length=Ship.DESTROYER,
             is_alive=True)
         ship_inst.rand_ship_position()
-        number_coordinates = ship_inst.shipcoordinates_set.all().count()
+        number_coordinates = ship_inst.shipcoordinate_set.all().count()
         self.assertEqual(Ship.DESTROYER, number_coordinates)
 
     def test_no_hits_on_ship(self):
@@ -179,7 +203,7 @@ class ModelsTests(TestCase):
             length=Ship.DESTROYER,
             is_alive=True)
         ship_inst.rand_ship_position()
-        for coord in ship_inst.shipcoordinates_set.all():
+        for coord in ship_inst.shipcoordinate_set.all():
             coord.hit = True
             coord.save()
         number_hits = ship_inst.get_num_hits()
@@ -193,7 +217,7 @@ class ModelsTests(TestCase):
             length=Ship.DESTROYER,
             is_alive=True)
         ship_inst.rand_ship_position()
-        for coord in ship_inst.shipcoordinates_set.all():
+        for coord in ship_inst.shipcoordinate_set.all():
             coord.hit = True
             coord.save()
         ship_inst.update_state()
@@ -206,9 +230,9 @@ class ModelsTests(TestCase):
             orientation=Ship.HORIZONTAL,
             length=Ship.CARRIER,
             is_alive=True)
-        coord_inst = ship_inst.shipcoordinates_set.create(
-            row=1,
-            column=1,
+        coord_inst = ship_inst.shipcoordinate_set.create(
+            ship_row=1,
+            ship_col=1,
             hit=False
         )
         self.assertIsNotNone(coord_inst)

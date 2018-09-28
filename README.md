@@ -1,20 +1,22 @@
-# py_battleship_api
+# REST API for a battleship game using Django
+
 Django application implementing a basic REST API for battleship.
 
 ## Table of Contents
-1. [Features](#features)
 
-2. [Prerequisites](#prerequisites)
+1.[Features](#features)
 
-3. [Getting Started](#getting-started)
+2.[Prerequisites](#prerequisites)
 
-4. [Usage](#usage)
+3.[Getting Started](#getting-started)
 
-5. [Running Tests](#running-tests)
+4.[Usage](#usage)
 
-6. [Built With](#built-with)
+5.[Running Tests](#running-tests)
 
-7. [License](#license)
+6.[Built With](#built-with)
+
+7.[License](#license)
 
 ## Features
 
@@ -47,6 +49,7 @@ pip install -r requirements.txt
 A more detail guide of how to setup virtualenv for our enviroment can be found in the following link:
 
 [https://packaging.python.org/guides/installing-using-pip-and-virtualenv/](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/)
+
 ## Usage
 
 The API endpoints response are in JSON format.
@@ -61,6 +64,7 @@ The API endpoints response are in JSON format.
 ### Data base migration
 
 This project uses a sqlite3 database. You will need to create and migrate the schema using django's migration tool.
+
 ```
 python manage.py makemigrations
 ```
