@@ -26,10 +26,14 @@ class Game(models.Model):
         while self.ship_set.count() < self.NUMBER_SHIPS_ALLOWED:
             rand_ship_type = random.sample([x[0] for x in Ship.TYPE_CHOICES],
                                            len(Ship.TYPE_CHOICES))
+            ships_list = []
             for ship_type in rand_ship_type:
                 rand_orientation = random.choice(Ship.ORIENTATION_CHOICES)
-                self.ship_set.create(orientation=rand_orientation[0],
-                                     length=ship_type)
+                ship_object = Ship(game=self,
+                                   orientation=rand_orientation[0],
+                                   length=ship_type)
+                ships_list.append(ship_object)
+            Ship.objects.bulk_create(ships_list)
             for ship in self.ship_set.all():
                 ship.rand_ship_position()
 
@@ -112,23 +116,27 @@ class Ship(models.Model):
                                         ShipCoordinate.MAX_COORDINATE)]
         while self.shipcoordinate_set.count() < self.length:
             row, column = random.choice(valid_range), random.choice(valid_range)
-            if (row, column) in used_coordinates_set:
-                continue
-            else:
+            if (row, column) not in used_coordinates_set:
                 used_coordinates_set.add((row, column))
                 self.shipcoordinate_set.create(
                     game=self.game,
                     ship_row=row,
                     ship_col=column)
+                coords_list = []
                 for x in range(self.length - 1):
                     if self.orientation == Ship.HORIZONTAL:
                         column += 1
                     elif self.orientation == Ship.VERTICAL:
                         row += 1
-                    self.shipcoordinate_set.create(game=self.game,
-                                                   ship_row=row,
-                                                   ship_col=column)
+                    ship_coord_obj = ShipCoordinate(
+                        ship=self,
+                        game=self.game,
+                        ship_row=row,
+                        ship_col=column)
+                  
                     used_coordinates_set.add((row, column))
+                    coords_list.append(ship_coord_obj)
+                ShipCoordinate.objects.bulk_create(coords_list)
 
     def get_num_hits(self):
         """
@@ -165,6 +173,17 @@ class Ship(models.Model):
             raise ValidationError(_('No more coordinates allowed.'))
 
 
+def validate_coordinate(value):
+    """
+    Method used to validate a coordinate
+
+    """
+    if value > ShipCoordinate.MAX_COORDINATE or value < ShipCoordinate.MIN_COORDINATE:
+        raise ValidationError('Value must be between {0} and {1}.'.format(
+            ShipCoordinate.MIN_COORDINATE,
+            ShipCoordinate.MAX_COORDINATE))
+
+
 class ShipCoordinate(models.Model):
     """
     Tile related to a given ship in a given game
@@ -184,8 +203,8 @@ class ShipCoordinate(models.Model):
         on_delete=models.CASCADE,
     )
     hit = models.BooleanField(default=False)
-    ship_row = models.IntegerField()
-    ship_col = models.IntegerField()
+    ship_row = models.IntegerField(validators=[validate_coordinate])
+    ship_col = models.IntegerField(validators=[validate_coordinate])
 
     def __str__(self):
         """
