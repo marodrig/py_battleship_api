@@ -126,8 +126,8 @@ class Ship(models.Model):
                     elif self.orientation == Ship.VERTICAL:
                         row += 1
                     self.shipcoordinate_set.create(game=self.game,
-                                                    ship_row=row,
-                                                    ship_col=column)
+                                                   ship_row=row,
+                                                   ship_col=column)
                     used_coordinates_set.add((row, column))
 
     def get_num_hits(self):
