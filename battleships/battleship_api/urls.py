@@ -4,6 +4,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 
 urlpatterns = [
+     #path('api/v1/games/', store.api_views.ProductList.as_view()),
     path('games/',
          views.GameList.as_view(),
          name='game-list'),

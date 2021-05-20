@@ -133,7 +133,7 @@ class Ship(models.Model):
                         game=self.game,
                         ship_row=row,
                         ship_col=column)
-                  
+                 
                     used_coordinates_set.add((row, column))
                     coords_list.append(ship_coord_obj)
                 ShipCoordinate.objects.bulk_create(coords_list)
